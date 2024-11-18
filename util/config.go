@@ -1,11 +1,15 @@
 package util
 
-import "github.com/spf13/viper"
+import (
+	"fmt"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
-	DBDriver      string `default:"postgres"`
-	DBSource      string `default:"postgresql://shu:shu@localhost:5432/simple_bank?sslmode=disable"`
-	ServerAddress string `default:":8080"`
+	DBDriver      string `mapstructure:"DB_DRIVER" default:"postgres"`
+	DBSource      string `mapstructure:"DB_SOURCE" default:"postgresql://shu:shu@localhost:5432/simple_bank?sslmode=disable"`
+	ServerAddress string `mapstructure:"SERVER_ADDRESS" default:":8080"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
@@ -19,6 +23,7 @@ func LoadConfig(path string) (config Config, err error) {
 		return
 	}
 	err = viper.Unmarshal(&config)
+	fmt.Println("config: ", config)
 	if err != nil {
 		return
 	}

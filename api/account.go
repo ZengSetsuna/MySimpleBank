@@ -5,12 +5,14 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type createAccountRequest struct {
-	Owner    string `json:"owner" binding:"required"`
-	Balance  int64  `json:"balance" binding:"required,min=0"`
-	Currency string `json:"currency" binding:"required,oneof=USD EUR"`
+	Owner string `json:"owner" binding:"required"`
+	//	Balance  int64  `json:"balance" binding:"required,min=0"`
+	Currency string `json:"currency" binding:"required,currency"`
 }
 
 func (server *Server) createAccount(c *gin.Context) {
@@ -20,15 +22,22 @@ func (server *Server) createAccount(c *gin.Context) {
 		return
 	}
 	account, err := server.store.CreateAccount(c, db.CreateAccountParams{
-		Owner:    req.Owner,
-		Balance:  req.Balance,
+		Owner: req.Owner,
+		//Balance:  req.Balance,
+		Balance:  0,
 		Currency: req.Currency,
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
+		if pqErr, ok := err.(*pgconn.PgError); ok {
+			if pqErr.Code == "23505" {
+				c.JSON(http.StatusConflict, errorResponse(err))
+				return
+			}
+			c.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+		c.JSON(http.StatusOK, account)
 	}
-	c.JSON(http.StatusOK, account)
 }
 
 type getAccountRequest struct {
@@ -48,6 +57,10 @@ func (server *Server) getAccount(c *gin.Context) {
 	}
 
 	account, err := server.store.GetAccount(c, req.ID)
+	if err == pgx.ErrNoRows {
+		c.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
