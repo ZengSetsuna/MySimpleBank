@@ -2,6 +2,8 @@ package api
 
 import (
 	db "GoProj/db/sqlc"
+	"GoProj/token"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +21,12 @@ func (server *Server) createAccount(c *gin.Context) {
 	var req createAccountRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.Username != req.Owner {
+		err := errors.New("account owner and token do not match")
+		c.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 	account, err := server.store.CreateAccount(c, db.CreateAccountParams{
@@ -65,6 +73,13 @@ func (server *Server) getAccount(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.Username != account.Owner {
+		err := errors.New("account owner and token do not match")
+		c.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
 	c.JSON(http.StatusOK, account)
 }
 
@@ -74,7 +89,9 @@ func (server *Server) listAccounts(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.ListAccountsParams{
+		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}

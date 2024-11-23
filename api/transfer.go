@@ -2,6 +2,7 @@ package api
 
 import (
 	db "GoProj/db/sqlc"
+	"GoProj/token"
 	"errors"
 	"fmt"
 	"net/http"
@@ -45,8 +46,15 @@ func (server *Server) createTransfer(c *gin.Context) {
 		return
 	}
 
-	_, valid := server.validAccount(c, req.FromAccountID, req.Currency)
+	fromAccount, valid := server.validAccount(c, req.FromAccountID, req.Currency)
 	if !valid {
+		return
+	}
+
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.Username != fromAccount.Owner {
+		err := errors.New("account owner and token do not match")
+		c.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 

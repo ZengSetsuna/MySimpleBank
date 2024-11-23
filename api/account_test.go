@@ -3,6 +3,7 @@ package api
 import (
 	mockdb "GoProj/db/mock"
 	db "GoProj/db/sqlc"
+	"GoProj/token"
 	"GoProj/util"
 	"bytes"
 	"encoding/json"
@@ -11,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
@@ -18,12 +20,14 @@ import (
 )
 
 func TestGetAccountAPI(t *testing.T) {
-	account := randomAccount()
+	user, _ := randomUser(t)
+	account := randomAccount(user.Username)
 
 	testCases := []struct {
 		name          string
 		accountID     int64
 		buildStubs    func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -35,6 +39,11 @@ func TestGetAccountAPI(t *testing.T) {
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchAccount(t, recorder.Body, account)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				token, err := tokenMaker.CreateToken(user.Username, time.Minute)
+				require.NoError(t, err)
+				request.Header.Set(authorizationHeaderKey, fmt.Sprintf("%s %s", authorizationTypeBearer, token))
 			},
 		},
 		{
@@ -77,7 +86,7 @@ func TestGetAccountAPI(t *testing.T) {
 
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
-			server := NewServer(store)
+			server := NewTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/accounts/%d", tc.accountID)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
@@ -89,10 +98,10 @@ func TestGetAccountAPI(t *testing.T) {
 	}
 }
 
-func randomAccount() db.Account {
+func randomAccount(owner string) db.Account {
 	return db.Account{
 		ID:       util.RandomInt(1, 1000),
-		Owner:    util.RandomOwner(),
+		Owner:    owner,
 		Balance:  util.RandomMoney(),
 		Currency: util.RandomCurrency(),
 	}

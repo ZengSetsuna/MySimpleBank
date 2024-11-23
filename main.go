@@ -22,7 +22,10 @@ func main() {
 	}
 
 	store := db.NewStore(connPool)
-	server := api.NewServer(store)
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal("cannot create server:", err)
+	}
 	fmt.Printf("Server is running at %s...\n", config.ServerAddress)
 	err = server.Start(config.ServerAddress)
 	if err != nil {
