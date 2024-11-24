@@ -65,8 +65,9 @@ func (server *Server) createUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	rsp := newUserResponse(user)
-	ctx.JSON(http.StatusOK, rsp)
+	//rsp := newUserResponse(user)
+	//ctx.JSON(http.StatusOK, rsp)
+	ctx.JSON(http.StatusOK, user)
 }
 
 type loginUserRequest struct {
@@ -92,8 +93,9 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	if err = util.CheckPassword(req.Password, user.HashedPassword); err != nil {
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+	if err = util.CheckPassword(user.HashedPassword, req.Password); err != nil {
+		ctx.JSON(http.StatusUnauthorized, user.HashedPassword)
+		//ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
