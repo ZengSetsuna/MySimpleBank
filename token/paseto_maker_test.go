@@ -31,11 +31,11 @@ func TestPasetoMaker(t *testing.T) {
 	require.WithinDuration(t, expiredAt, time.Unix(payload.ExpiredAt, 0), time.Second)
 }
 
-func TestExpiredPasetoToekn(t *testing.T) {
+func TestExpiredPasetoToken(t *testing.T) {
 	maker, err := NewPasetoMaker(util.RandomString(32))
 	require.NoError(t, err)
 
-	token, err := maker.CreateToken(util.RandomOwner(), -time.Minute)
+	token, err := maker.CreateToken(util.RandomOwner(), -time.Minute*10)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 

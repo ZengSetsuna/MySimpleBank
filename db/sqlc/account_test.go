@@ -79,7 +79,6 @@ func TestDeleteAccount(t *testing.T) {
 	require.Empty(t, account2)
 }
 
-/*
 func TestListAccounts(t *testing.T) {
 	lastAccount := make([]Account, 10)
 	for i := 0; i < 10; i++ {
@@ -103,4 +102,3 @@ func TestListAccounts(t *testing.T) {
 		i++
 	}
 }
-*/
