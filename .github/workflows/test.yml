@@ -33,7 +33,7 @@ jobs:
 
       - name: Create app.env
         run: |
-          echo "${{ secrets.APP_ENV_CONTENT }}" > /home/runner/work/MySimpleBank/MySimpleBank/app
+          echo "${{ secrets.APP_ENV_CONTENT }}" > /home/runner/work/MySimpleBank/MySimpleBank/app.env
 
       - name: Set up Go
         uses: actions/setup-go@v4
