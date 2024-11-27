@@ -15,7 +15,8 @@ jobs:
       uses: actions/checkout@v2
     
     - name: Create app.env
-      run: echo "${{ secrets.APP_ENV_CONTENT }}" > app.env
+      run: |
+          echo "${{ secrets.APP_ENV_CONTENT }}" > /home/runner/work/MySimpleBank/MySimpleBank/app.env
 
     - name: Install kubectl
       uses: azure/setup-kubectl@v1
