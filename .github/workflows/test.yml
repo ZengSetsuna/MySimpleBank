@@ -29,11 +29,6 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Create app.env
-        run: |
-          echo "${{ secrets.APP_ENV_CONTENT }}" > /home/runner/work/MySimpleBank/MySimpleBank/app.env
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -43,7 +38,7 @@ jobs:
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
-
+      
       - name: Install golang-migrate
         run: |
           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz
@@ -52,6 +47,10 @@ jobs:
 
       - name: Run migrations
         run: make migrateup
+        
+      - name: Create app.env
+        run: |
+          echo "${{ secrets.APP_ENV_CONTENT }}" > /home/runner/work/MySimpleBank/MySimpleBank/app.env
 
       - name: Test
         run: make test
