@@ -65,9 +65,9 @@ func (server *Server) createUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	//rsp := newUserResponse(user)
-	//ctx.JSON(http.StatusOK, rsp)
-	ctx.JSON(http.StatusOK, user)
+	rsp := newUserResponse(user)
+	ctx.JSON(http.StatusOK, rsp)
+	//ctx.JSON(http.StatusOK, user)
 }
 
 type loginUserRequest struct {
