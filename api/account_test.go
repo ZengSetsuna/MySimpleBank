@@ -41,7 +41,7 @@ func TestGetAccountAPI(t *testing.T) {
 				requireBodyMatchAccount(t, recorder.Body, account)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				token, err := tokenMaker.CreateToken(user.Username, time.Minute)
+				token, _, err := tokenMaker.CreateToken(user.Username, time.Minute)
 				require.NoError(t, err)
 				request.Header.Set(authorizationHeaderKey, fmt.Sprintf("%s %s", authorizationTypeBearer, token))
 			},
@@ -56,7 +56,7 @@ func TestGetAccountAPI(t *testing.T) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				token, err := tokenMaker.CreateToken(user.Username, time.Minute)
+				token, _, err := tokenMaker.CreateToken(user.Username, time.Minute)
 				require.NoError(t, err)
 				request.Header.Set(authorizationHeaderKey, fmt.Sprintf("%s %s", authorizationTypeBearer, token))
 			},
@@ -71,7 +71,7 @@ func TestGetAccountAPI(t *testing.T) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				token, err := tokenMaker.CreateToken(user.Username, time.Minute)
+				token, _, err := tokenMaker.CreateToken(user.Username, time.Minute)
 				require.NoError(t, err)
 				request.Header.Set(authorizationHeaderKey, fmt.Sprintf("%s %s", authorizationTypeBearer, token))
 			},
@@ -86,7 +86,7 @@ func TestGetAccountAPI(t *testing.T) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				token, err := tokenMaker.CreateToken(user.Username, time.Minute)
+				token, _, err := tokenMaker.CreateToken(user.Username, time.Minute)
 				require.NoError(t, err)
 				request.Header.Set(authorizationHeaderKey, fmt.Sprintf("%s %s", authorizationTypeBearer, token))
 			},
